@@ -68,7 +68,7 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 		$this->assign( $index, $result );
 	}
 
-	private function initSqlForLandlineNumbersInMobiles( &$sql, &$totalSql ){
+	private function initSqlForLandlineNumbersInMobiles(){
 
 		$this->landlineNumbersInMobilesSql['retrieve'] = RETRIEVE_QUERY." AND 
 			(phone NOT LIKE '07%') AND (phone LIKE '0%') AND NOT ".BROKEN_VALUES_FORMULA."  
@@ -80,7 +80,7 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 			AND phone_type_id=".PHONE_TYPE_MOBILE_INDEX;
 	}
 
-	private function initSqlForMobileNumbersInLandlines( &$sql, &$totalSql ){
+	private function initSqlForMobileNumbersInLandlines(){
 
 		$this->mobileNumbersInLandlinesSql['retrieve'] = RETRIEVE_QUERY." AND  
 			(phone LIKE '07%') AND NOT (".BROKEN_VALUES_FORMULA.")  
