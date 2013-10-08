@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<menu>
+  <item>
+    <path>civicrm/phonevalidator</path>
+    <page_callback>CRM_Phonevalidator_Page_PhoneValidator</page_callback>
+    <title>CiviCRM Phone Validator</title>
+    <access_arguments>access CiviCRM</access_arguments>
+  </item>
+</menu>

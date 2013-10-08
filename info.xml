@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<extension key="uk.org.futurefirst.networks.phonevalidator" type="module">
+  <file>phonevalidator</file>
+  <name>UK Phone Validator</name>
+  <description>Displays phone numbers that are likely to be invalid, or that look to be incorrectly assigned as either a mobile phone number or a landline number. Allows deletion and changes to any phone number through the interface. USAGE: in the menu under 'Contacts'.</description>
+  <license>AGPL</license>
+  <maintainer>
+    <author>John E Prescott</author>
+    <email>john@futurefirst.org.uk</email>
+  </maintainer>
+  <releaseDate>2013-10-08</releaseDate>
+  <version>1.0</version>
+  <develStage>still</develStage>
+  <compatibility>
+    <ver>4.2</ver>
+  </compatibility>
+  <comments>TODO: 1. Change background colour if the phone number goes from being invalid to being valid. 2. Have to column to say what's wrong. 3. Suggest fixes to the values. 4. Check for duplicate entries.</comments>
+  <civix>
+    <namespace>CRM/Phonevalidator</namespace>
+  </civix>
+</extension>
