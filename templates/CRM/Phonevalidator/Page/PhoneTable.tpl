@@ -2,7 +2,7 @@
 	<tr><th>contact name</th><th>phone</th><th>extension</th><th>type</th><th>actions</th>
 	{foreach from=$data item=eachRecord}
 		{ts}
-		<tr id="{$eachRecord.phone_id}" class="crm-entity {$eachRecord.phone_id}">
+		<tr id="phone-{$eachRecord.phone_id}" class="crm-entity {$eachRecord.phone_id}">
 		<td><a title="Edit {$eachRecord.display_name}'s contact record." href="/civicrm/contact/add?reset=1&action=update&cid={$eachRecord.contact_id}">{$eachRecord.display_name}</a></td>
 		<td><span id="phone-{$eachRecord.phone_id}" class="crmf-phone crm-editable">{$eachRecord.phone}</span></td>
 		<td><span id="phone-{$eachRecord.phone_id}" class="crmf-phone-ext crm-editable">{$eachRecord.phone_ext}</span></td>
