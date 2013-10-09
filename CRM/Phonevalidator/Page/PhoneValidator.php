@@ -17,7 +17,7 @@ const RETRIEVE_QUERY = "SELECT contact_id, display_name, source, civicrm_phone.i
 	FROM civicrm_phone 
 	INNER JOIN civicrm_contact 
 		ON civicrm_phone.contact_id = civicrm_contact.id 
-	WHERE civicrm_contact.is_deleted!='1' AND source!='' ";
+	WHERE civicrm_contact.is_deleted!='1' ";
 
 const COUNT_QUERY = "SELECT COUNT(*) AS count 
 	FROM civicrm_phone
