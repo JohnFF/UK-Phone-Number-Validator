@@ -26,7 +26,7 @@ const COUNT_QUERY = "SELECT COUNT(*) AS count
 	WHERE civicrm_contact.is_deleted!='1' AND ";
 
 define("BROKEN_VALUES_FORMULA", "
-	( (CHAR_LENGTH(phone) != ".UK_NUMBER_LENGTH.") OR (SUBSTRING(phone, 1, 1)!='0') OR (phone LIKE '%(%') )
+	( (CHAR_LENGTH(REPLACE(phone, ' ', '')) != ".UK_NUMBER_LENGTH.") OR (SUBSTRING(phone, 1, 1)!='0') OR (REPLACE(phone, ' ', '') NOT REGEXP '^[0-9]+$') )
 ");
 
 class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
@@ -84,12 +84,12 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 
 		$this->mobileNumbersInLandlinesSql['retrieve'] = RETRIEVE_QUERY." AND  
 			(phone LIKE '07%') AND NOT (".BROKEN_VALUES_FORMULA.")  
-			AND phone_type_id=".PHONE_TYPE_LANDLINE_INDEX." ORDER BY civicrm_contact.id 
+			AND phone_type_id!=".PHONE_TYPE_MOBILE_INDEX." ORDER BY civicrm_contact.id 
 		LIMIT 0, ".NUM_RECORDS_AT_ONCE; 
 
 		$this->mobileNumbersInLandlinesSql['total'] = COUNT_QUERY." 
 			(phone LIKE '07%') AND NOT (".BROKEN_VALUES_FORMULA.")  
-			AND phone_type_id=".PHONE_TYPE_LANDLINE_INDEX;
+			AND phone_type_id!=".PHONE_TYPE_MOBILE_INDEX;
 
 	}
 
