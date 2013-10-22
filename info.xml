@@ -2,15 +2,15 @@
 <extension key="uk.org.futurefirst.networks.phonevalidator" type="module">
   <file>phonevalidator</file>
   <name>Phone Validator</name>
-  <description>Displays phone numbers that are likely to be invalid, or that look to be incorrectly assigned as either a mobile phone number or a landline number. Allows deletion and changes to any phone number through the interface. USAGE: in the menu under 'Contacts'.</description>
+  <description>Displays phone numbers that are likely to be invalid, or that look to be incorrectly assigned as either a mobile phone number or a landline number. Allows deletion and changes to any phone number through the interface. USAGE: in the menu under 'Contacts'. v1.1 Adds a filter on different types of phone number.</description>
   <license>AGPL</license>
   <maintainer>
     <author>John E Prescott</author>
     <email>john@futurefirst.org.uk</email>
   </maintainer>
   <releaseDate>2013-10-08</releaseDate>
-  <version>1.0</version>
-  <develStage>stable</develStage>
+  <version>1.1</version>
+  <develStage>beta</develStage>
   <compatibility>
 	<ver>4.2</ver>
 	<ver>4.3</ver>

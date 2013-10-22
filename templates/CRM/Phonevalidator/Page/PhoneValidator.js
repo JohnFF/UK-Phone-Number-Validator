@@ -1,15 +1,21 @@
 {literal}
 <script type="text/javascript" language="javascript">
 
-	// set each of the select functions to have the correct initial value
+	// set each of the select functions to have its correct initial value
         cj.each(cj('select'), function(){
-                if (cj(this).attr("selected") != 1){
-                        cj(this).val(cj(this).attr("selectedValue"));
-                }
+		cj(this).val(cj(this).attr("selectedValue"));
         });   
 
+	// change the page when a new phone type to show is selected
+	cj('#showPhoneType').change(function() {
+		var old_url = window.location.pathname;
+		var old_url_without_params = old_url.substring(0, old_url.indexOf('?'));
+		var new_url = old_url_without_params + "?phone_type=" + cj('#showPhoneType').attr("value");
+		window.location.href = new_url;
+	});
+
 	// add the functionality to save the new phone type if it's changed 
-        cj('select').change(function() {
+        cj('.select_setPhoneType').change(function() {
                 var phone_id = cj(this).attr("phone_id");
                 var new_value = cj(this).attr("value");        
                 cj().crmAPI ('Phone','update',{ id:phone_id, phone_type_id:new_value }

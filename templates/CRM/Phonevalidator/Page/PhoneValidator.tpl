@@ -1,9 +1,16 @@
 {include file="CRM/common/crmeditable.tpl"}
 <h3>Broken Phone Numbers</h3>
-<p>This section shows the first {$broken_count} of {$broken_total} contacts that have a phone number that looks to be broken. It either has a space in it ({$broken_count_space}), or doesn't start with a 0 ({$broken_count_nozero}), doesn't have 11 letters ({$broken_count_noteleven}), or contains a '(' character ({$broken_count_containsbracket}).</p>
+Show <select id="showPhoneType" selectedValue="{$selected_show_phone_type}">
+				<option value="no_type_selected">all phone types</option>
+                                {crmAPI var="OptionValueS" entity="OptionValue" action="get" sequential="1" option_group_name="phone_type" option_sort="weight"}
+                                {foreach from=$OptionValueS.values item=OptionValue}
+                                        <option value="{$OptionValue.value}">{$OptionValue.label}</option>
+                                {/foreach}
+                        </select>
+<p>This section shows the first {$broken_count} of {$broken_total} contacts that have a {$selected_show_phone_type_label} number that looks to be broken. It either doesn't start with a 0 ({$broken_count_nozero}), doesn't have 11 digits excluding spaces ({$broken_count_noteleven}), or contains a non-numerical character ({$broken_count_containsnonnumber}).</p>
 
 {if $broken_count eq 0}
-	<p>There appear to be no broken phone numbers.</p> 
+	<p>There appear to be no broken {$selected_show_phone_type_label} numbers.</p> 
 {else}
 	{include file="CRM/Phonevalidator/Page/PhoneTable.tpl" data=$broken_output}
 {/if}

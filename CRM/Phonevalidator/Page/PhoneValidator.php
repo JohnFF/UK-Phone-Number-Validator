@@ -4,6 +4,8 @@ require_once 'CRM/Core/Page.php';
 
 // Contact Validator Settings
 const NUM_RECORDS_AT_ONCE = 50;
+const SHOW_PHONE_TYPE_NONE_SELECTED = "no_phone_type_selected";
+const SHOW_PHONE_TYPE_NONE_SELECTED_LABEL = "phone";
 
 // Database Indices Constants
 const PHONE_TYPE_LANDLINE_INDEX = 1;
@@ -34,29 +36,79 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 	private $brokenNumbersSql = array(); 
 	private $landlineNumbersInMobilesSql = array(); 
 	private $mobileNumbersInLandlinesSql = array(); 
+	private $phoneTypeToShow;
+	private $phoneTypeLimit;
+
+	private function initPhoneTypeLimit(){
+		$dao = CRM_Core_DAO::executeQuery( "SELECT MAX(civicrm_option_value.value) AS max_id FROM civicrm_option_group JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id WHERE civicrm_option_group.name='phone_type'" );
+		
+		$result = 0;
+
+		while ( $dao->fetch() ){
+			$result = $dao->max_id;	
+		}
+
+		$this->phoneTypeLimit = $result;
+	}
+
+	private function getPhoneTypeLabel($cleanPhoneTypeId){
+		$dao = CRM_Core_DAO::executeQuery( "SELECT label FROM civicrm_option_group JOIN civicrm_option_value ON civicrm_option_group.id = civicrm_option_value.option_group_id WHERE civicrm_option_group.name='phone_type' AND value=".$cleanPhoneTypeId );
+		
+		$result = SHOW_PHONE_TYPE_NONE_SELECTED_LABEL;
+
+		while ( $dao->fetch() ){
+			$result = $dao->label;	
+		}
+
+		return strtolower($result);
+	}
+
+	private function initPhoneTypeToShow(){
+		$returnValue = SHOW_PHONE_TYPE_NONE_SELECTED;
+		$returnLabel = "phone";
+		$rawPhoneType = $_GET['phone_type'];
+		if ($rawPhoneType != NULL){
+			$cleanPhoneTypeId = intval($rawPhoneType); // Use intval to prevent SQL injection
+			if ($cleanPhoneType >= 0 AND $cleanPhoneTypeId <= $this->phoneTypeLimit){
+				$returnValue = $cleanPhoneTypeId;
+				$returnLabel = $this->getPhoneTypeLabel($cleanPhoneTypeId);
+			}
+		}
+		$this->assign('selected_show_phone_type', $returnValue);
+		$this->assign('selected_show_phone_type_label', $returnLabel);
+		$this->phoneTypeToShow = $returnValue;
+	}
+
+	private function addPhoneTypeFilterToQueryIfNeeded(&$sqlQuery){
+		if ($this->phoneTypeToShow != SHOW_PHONE_TYPE_NONE_SELECTED){
+			$sqlQuery .= " AND phone_type_id=".$this->phoneTypeToShow; 
+		}
+	}
 
 	private function initSqlForBrokenNumbers(){
 
-		$this->brokenNumbersSql['retrieve'] = RETRIEVE_QUERY." AND ".BROKEN_VALUES_FORMULA." 
-		ORDER BY civicrm_contact.id  
+		$this->brokenNumbersSql['retrieve'] = RETRIEVE_QUERY." AND ".BROKEN_VALUES_FORMULA;
+		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['retrieve']);
+		$this->brokenNumbersSql['retrieve'] .= " ORDER BY civicrm_contact.id  
 		LIMIT 0, ".NUM_RECORDS_AT_ONCE; 
 
 		$this->brokenNumbersSql['total'] = COUNT_QUERY.BROKEN_VALUES_FORMULA;
+		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['total']);
 
 		// broken_nozero
 		$this->brokenNumbersSql['noZero'] = COUNT_QUERY." (phone NOT LIKE '0%')";
-
-		// broken_space
-		$this->brokenNumbersSql['hasSpace'] = COUNT_QUERY." (phone LIKE '% %') "; 
+		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['noZero']);
 
 		// broken_noteleven
 		$this->brokenNumbersSql['notEleven'] = COUNT_QUERY." (CHAR_LENGTH(phone) != 11) ";
+		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['notEleven']);
 	
-		// broken_containsbracket
-		$this->brokenNumbersSql['hasBracket'] = COUNT_QUERY." (phone LIKE '%(%')" ;
+		// broken_containsNonNumber
+		$this->brokenNumbersSql['hasNonNumber'] = COUNT_QUERY." (REPLACE(phone, ' ', '') NOT REGEXP '^[0-9]+$')";
+		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['hasNonNumber']);
 	}
 
-	private function runAdditionalQuery( $countSql, $index ){
+	private function runQueryAndAssign( $countSql, $index ){
 		$dao = CRM_Core_DAO::executeQuery( $countSql );
 		
 		$result = 0;
@@ -124,15 +176,16 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 		// Example: Set the page-title dynamically; alternatively, declare a static title in xml/Menu/*.xml
 		CRM_Utils_System::setTitle(ts('UK Phone Number Validator'));
 
+		$this->initPhoneTypeLimit();
+		$this->initPhoneTypeToShow();
 		$this->initSqlForBrokenNumbers();
 		$this->initSqlForLandlineNumbersInMobiles();
 		$this->initSqlForMobileNumbersInLandlines();
 
 		$this->retrieveNumbers($this->brokenNumbersSql['retrieve'], $this->brokenNumbersSql['total'], 'broken_' );
-		$this->runAdditionalQuery( $this->brokenNumbersSql['hasSpace'], 'broken_count_space' );
-		$this->runAdditionalQuery( $this->brokenNumbersSql['noZero'], 'broken_count_nozero' );
-		$this->runAdditionalQuery( $this->brokenNumbersSql['notEleven'], 'broken_count_noteleven' );
-		$this->runAdditionalQuery( $this->brokenNumbersSql['hasBracket'], 'broken_count_containsbracket' );
+		$this->runQueryAndAssign( $this->brokenNumbersSql['noZero'], 'broken_count_nozero' );
+		$this->runQueryAndAssign( $this->brokenNumbersSql['notEleven'], 'broken_count_noteleven' );
+		$this->runQueryAndAssign( $this->brokenNumbersSql['hasNonNumber'], 'broken_count_containsnonnumber' );
 
 		$this->retrieveNumbers( $this->mobileNumbersInLandlinesSql['retrieve'], $this->mobileNumbersInLandlinesSql['total'], 'mob_in_ll_' );
 

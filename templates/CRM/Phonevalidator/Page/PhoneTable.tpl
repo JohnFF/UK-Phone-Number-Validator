@@ -7,7 +7,7 @@
 		<td><span id="phone-{$eachRecord.phone_id}" class="crmf-phone crm-editable">{$eachRecord.phone}</span></td>
 		<td><span id="phone-{$eachRecord.phone_id}" class="crmf-phone-ext crm-editable">{$eachRecord.phone_ext}</span></td>
 		<td>
-			<select phone_id="{$eachRecord.phone_id}" selectedValue="{$eachRecord.phone_type}">
+			<select class="select_setPhoneType" phone_id="{$eachRecord.phone_id}" selectedValue="{$eachRecord.phone_type}">
 				{crmAPI var="OptionValueS" entity="OptionValue" action="get" sequential="1" option_group_name="phone_type" option_sort="weight"}
 				{foreach from=$OptionValueS.values item=OptionValue}
 					<option value="{$OptionValue.value}">{$OptionValue.label}</option>
