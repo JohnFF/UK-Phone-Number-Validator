@@ -6,6 +6,8 @@ require_once 'CRM/Core/Page.php';
 const NUM_RECORDS_AT_ONCE = 50;
 const SHOW_PHONE_TYPE_NONE_SELECTED = "no_phone_type_selected";
 const SHOW_PHONE_TYPE_NONE_SELECTED_LABEL = "phone";
+const SHOW_CONTACT_TYPE_NONE_SELECTED = "no_contact_type_selected";
+const SHOW_CONTACT_TYPE_NONE_SELECTED_LABEL = "contact";
 
 // Database Indices Constants
 const PHONE_TYPE_LANDLINE_INDEX = 1;
@@ -37,6 +39,7 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 	private $landlineNumbersInMobilesSql = array(); 
 	private $mobileNumbersInLandlinesSql = array(); 
 	private $phoneTypeToShow;
+	private $contactTypeToShow;
 	private $phoneTypeLimit;
 
 	private function initPhoneTypeLimit(){
@@ -65,7 +68,7 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 
 	private function initPhoneTypeToShow(){
 		$returnValue = SHOW_PHONE_TYPE_NONE_SELECTED;
-		$returnLabel = "phone";
+		$returnLabel = SHOW_PHONE_TYPE_NONE_SELECTED_LABEL;
 		$rawPhoneType = $_GET['phone_type'];
 		if ($rawPhoneType != NULL){
 			$cleanPhoneTypeId = intval($rawPhoneType); // Use intval to prevent SQL injection
@@ -79,33 +82,56 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 		$this->phoneTypeToShow = $returnValue;
 	}
 
+	private function initContactTypeToShow(){
+		$returnValue = SHOW_CONTACT_TYPE_NONE_SELECTED;
+		$returnLabel = SHOW_CONTACT_TYPE_NONE_SELECTED_LABEL;
+		$rawContactType = $_GET['contact_type'];
+		if ($rawContactType != NULL && $rawContactType != SHOW_CONTACT_TYPE_NONE_SELECTED){
+			$returnValue = mysql_real_escape_string($rawContactType); // Use mysql_real_escape_string to prevent SQL injection
+			$returnLabel = strtolower($returnValue);
+		}
+		$this->assign('selected_show_contact_type', $returnValue);
+		$this->assign('selected_show_contact_type_label', $returnLabel);
+		$this->contactTypeToShow = $returnValue;
+	}
+
 	private function addPhoneTypeFilterToQueryIfNeeded(&$sqlQuery){
 		if ($this->phoneTypeToShow != SHOW_PHONE_TYPE_NONE_SELECTED){
 			$sqlQuery .= " AND phone_type_id=".$this->phoneTypeToShow; 
 		}
 	}
 
-	private function initSqlForBrokenNumbers(){
+	private function addContactTypeFilterToQueryIfNeeded(&$sqlQuery){
+		if ($this->contactTypeToShow != SHOW_CONTACT_TYPE_NONE_SELECTED){
+			$sqlQuery .= " AND contact_type='".$this->contactTypeToShow."'";	
+		}
+	}
 
+	private function initSqlForBrokenNumbers(){
 		$this->brokenNumbersSql['retrieve'] = RETRIEVE_QUERY." AND ".BROKEN_VALUES_FORMULA;
 		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['retrieve']);
+		$this->addContactTypeFilterToQueryIfNeeded($this->brokenNumbersSql['retrieve']);
 		$this->brokenNumbersSql['retrieve'] .= " ORDER BY civicrm_contact.id  
-		LIMIT 0, ".NUM_RECORDS_AT_ONCE; 
+							LIMIT 0, ".NUM_RECORDS_AT_ONCE; 
 
 		$this->brokenNumbersSql['total'] = COUNT_QUERY.BROKEN_VALUES_FORMULA;
 		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['total']);
+		$this->addContactTypeFilterToQueryIfNeeded($this->brokenNumbersSql['total']);
 
 		// broken_nozero
 		$this->brokenNumbersSql['noZero'] = COUNT_QUERY." (phone NOT LIKE '0%')";
 		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['noZero']);
+		$this->addContactTypeFilterToQueryIfNeeded($this->brokenNumbersSql['noZero']);
 
 		// broken_noteleven
 		$this->brokenNumbersSql['notEleven'] = COUNT_QUERY." (CHAR_LENGTH(phone) != 11) ";
 		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['notEleven']);
+		$this->addContactTypeFilterToQueryIfNeeded($this->brokenNumbersSql['notEleven']);
 	
 		// broken_containsNonNumber
 		$this->brokenNumbersSql['hasNonNumber'] = COUNT_QUERY." (REPLACE(phone, ' ', '') NOT REGEXP '^[0-9]+$')";
 		$this->addPhoneTypeFilterToQueryIfNeeded($this->brokenNumbersSql['hasNonNumber']);
+		$this->addContactTypeFilterToQueryIfNeeded($this->brokenNumbersSql['hasNonNumber']);
 	}
 
 	private function runQueryAndAssign( $countSql, $index ){
@@ -178,6 +204,7 @@ class CRM_Phonevalidator_Page_PhoneValidator extends CRM_Core_Page {
 
 		$this->initPhoneTypeLimit();
 		$this->initPhoneTypeToShow();
+		$this->initContactTypeToShow();
 		$this->initSqlForBrokenNumbers();
 		$this->initSqlForLandlineNumbersInMobiles();
 		$this->initSqlForMobileNumbersInLandlines();

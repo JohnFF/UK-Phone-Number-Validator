@@ -7,10 +7,12 @@
         });   
 
 	// change the page when a new phone type to show is selected
-	cj('#showPhoneType').change(function() {
+	cj('.jumpSelector').change(function() {
 		var old_url = window.location.pathname;
 		var old_url_without_params = old_url.substring(0, old_url.indexOf('?'));
-		var new_url = old_url_without_params + "?phone_type=" + cj('#showPhoneType').attr("value");
+		var showPhoneType = cj('#showPhoneType').attr("value");
+		var showContactType = cj('#showContactType').attr("value");
+		var new_url = old_url_without_params + "?phone_type=" + showPhoneType + "&contact_type=" + showContactType; 
 		window.location.href = new_url;
 	});
 

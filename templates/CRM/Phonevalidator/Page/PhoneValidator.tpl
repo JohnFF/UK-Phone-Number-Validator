@@ -1,13 +1,21 @@
 {include file="CRM/common/crmeditable.tpl"}
 <h3>Broken Phone Numbers</h3>
-Show <select id="showPhoneType" selectedValue="{$selected_show_phone_type}">
-				<option value="no_type_selected">all phone types</option>
-                                {crmAPI var="OptionValueS" entity="OptionValue" action="get" sequential="1" option_group_name="phone_type" option_sort="weight"}
-                                {foreach from=$OptionValueS.values item=OptionValue}
-                                        <option value="{$OptionValue.value}">{$OptionValue.label}</option>
-                                {/foreach}
-                        </select>
-<p>This section shows the first {$broken_count} of {$broken_total} contacts that have a {$selected_show_phone_type_label} number that looks to be broken. It either doesn't start with a 0 ({$broken_count_nozero}), doesn't have 11 digits excluding spaces ({$broken_count_noteleven}), or contains a non-numerical character ({$broken_count_containsnonnumber}).</p>
+	Show <select id="showPhoneType" class="jumpSelector" selectedValue="{$selected_show_phone_type}">
+		<option value="no_type_selected">all phone types</option>
+		{crmAPI var="OptionValues" entity="OptionValue" action="get" sequential="1" option_group_name="phone_type" option_sort="weight"}
+		{foreach from=$OptionValues.values item=OptionValue}
+			<option value="{$OptionValue.value}">{$OptionValue.label}</option>
+		{/foreach}
+	</select>
+	from <select id="showContactType" class="jumpSelector" selectedValue="{$selected_show_contact_type}">
+		<option value="no_contact_type_selected">all contact types</option>
+		{crmAPI var="ContactTypes" entity="ContactType" action="get" sequential="1" parent_id="NULL"}
+		{foreach from=$ContactTypes.values item=ContactType}
+			<option value="{$ContactType.label}">{$ContactType.label}s</option>
+		{/foreach}
+
+	</select>
+<p>This section shows the first {$broken_count} of {$broken_total} {$selected_show_contact_type_label}s that have a {$selected_show_phone_type_label} number that looks to be broken. It either doesn't start with a 0 ({$broken_count_nozero}), doesn't have 11 digits excluding spaces ({$broken_count_noteleven}), or contains a non-numerical character ({$broken_count_containsnonnumber}).</p>
 
 {if $broken_count eq 0}
 	<p>There appear to be no broken {$selected_show_phone_type_label} numbers.</p> 

@@ -82,7 +82,7 @@ function phonevalidator_civicrm_navigationMenu( &$params ) {
         'label' => 'UK Phone Number Validator',
         'name' => 'PhoneValidator',
         'url' => 'civicrm/phonevalidator',
-        'permission' => 'administer CiviCRM',
+        'permission' => 'access CiviCRM',
         'operator' => NULL,
         'separator' => TRUE,
         'parentID' => $contactMenuId,
